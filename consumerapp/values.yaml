@@ -1,0 +1,68 @@
+# Default values for appdeployment.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# number of replicas
+replicaCount: 1
+# number of seconds to wait for deployment to progress
+progressDeadlineSeconds: 200
+# minimum number of seconds for which pod should be ready 
+minReadySeconds: 10
+
+rollingUpdate:
+  # number of pods to create above the specified no of replicas
+  maxSurge: 1
+  # maximum pods which will be unavailable
+  maxUnavailable: 0
+
+# the docker image for applications
+image:
+  # webapp docker image
+  repository: csye7125project/consumer-app:v1
+  # pull policy for the image
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: [app: regcred]
+# name of docker secret
+imagePullSecretName: regcred
+nameOverride: ""
+fullnameOverride: ""
+dockerConfigJson: ""
+
+# secrets for docker to pull a registry cred
+# imagePullSecrets:
+#   - app: regcred
+
+# webapp service variables
+service:
+  name: http
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+
+# override configvars variables
+configVars:
+  # kakfa broker list name
+  KafkaBroker: ""
+  # Elastic search url
+  ElasticUrl: ""
+  # elastic search username
+  ElasticUsername: elastic
+  # kafka topic name
+  TopicName: messages
+
+# variables for app container
+appContainer:
+  containerPort: 3500
+  # Number of seconds after the container has started before liveness or readiness probes are initiated.
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+# readiness and liveness prob variables along with port and path
+probe:
+  readiness:
+    path: /healthz
+    port: 3200
+  liveness:
+    path: /healthz
+    port: 3200

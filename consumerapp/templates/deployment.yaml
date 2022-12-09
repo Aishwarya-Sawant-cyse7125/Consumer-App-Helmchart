@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "consumerapp.name" . }}-consumer-app
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "consumerapp.name" . }}-consumer-app
+spec:
+  replicas: {{ .Values.replicaCount }}
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  minReadySeconds: {{ .Values.minReadySeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ include "consumerapp.name" . }}-deployment
+  template:
+    metadata:
+      labels:
+        app: {{ include "consumerapp.name" . }}-deployment
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        - name: regcred
+      {{- end }}
+      containers:
+        - name: {{ include "consumerapp.name" . }}
+          image: {{ .Values.image.repository }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "consumerapp.name" . }}-configmap
+          ports:
+            - containerPort: {{ .Values.appContainer.containerPort }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: {{ .Values.probe.readiness.path }}
+          #     port: {{ .Values.probe.readiness.port }}
+          #   initialDelaySeconds: {{ .Values.appContainer.initialDelaySeconds }}
+          #   periodSeconds: {{ .Values.appContainer.periodSeconds }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: {{ .Values.probe.liveness.path }}
+          #     port: {{ .Values.probe.liveness.port }}
+          #   initialDelaySeconds: {{ .Values.appContainer.initialDelaySeconds }}
+          #   periodSeconds: {{ .Values.appContainer.periodSeconds }}

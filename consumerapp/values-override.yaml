@@ -1,0 +1,53 @@
+# Override Default values for appdeployment.
+
+# Deployment override variables
+
+# override number of replicas
+replicaCount: 3
+# override number of seconds to wait for deployment to progress
+progressDeadlineSeconds: 200
+# override minimum number of seconds for which pod should be ready 
+minReadySeconds: 30
+
+rollingUpdate:
+  # override no of pods to create above the specified no of replicas
+  maxSurge: 1
+  # override maximum pods which will be unavailable
+  maxUnavailable: 0
+
+image:
+  # webapp docker image
+  repository: csye7125project/consumer-app:v1
+
+# override secrets for docker to pull a registry cred
+imagePullSecrets: [app: regcred]
+
+# override webapp service variables
+service:
+  name: http
+  type: LoadBalancer
+  port: 3500
+  targetPort: 3500
+
+# override configvars variables
+configVars:
+  # kakfa broker list name
+  kafkaBroker: ""
+  # Elastic search url
+  ElasticUrl: ""
+  # elastic search username
+  ElasticUsername: elastic
+  # kafka topic name
+  TopicName: messages
+
+# override variables for app container
+appContainer:
+  containerPort: 3500
+  # Number of seconds after the container has started before liveness or readiness probes are initiated.
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+# override readiness probe
+probe:
+  readiness:
+    path: /healthz
